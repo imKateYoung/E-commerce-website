@@ -1,18 +1,34 @@
 import React from 'react';
 import {Paper,Stepper,Step,StepLabel,Typography,CircularProgress, divider,Button} from '@material-ui/core';
 import {Fragment} from 'react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import useStyles from './styles';
 import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
-
+import {commerce} from '../../../lib/commerce';
 
 const steps=['Shipping address', 'Payment details']
 
-const Checkout = () => {
+const Checkout = ({ cart}) => {
     
     const [activeStep,setActiveStep] = useState(0);
+    const [checkoutToken, setcheckoutToken] = useState(null);
     const classes = useStyles();
+
+    useEffect(() =>{
+        const generateToken = async () =>{
+            try{
+                const token = await commerce.checkout.generateToken(cart.id, {type:'cart'});
+                console.log(token);
+                
+                setcheckoutToken(token)
+            }
+            catch(error){
+
+            }
+        }
+        generateToken();
+    },[]);
 
     const Confirmation = () => (
         <div>
@@ -20,7 +36,7 @@ const Checkout = () => {
         </div>
     )
 
-    const Form = () => activeStep === 0 ? <AddressForm /> : <PaymentForm />
+    const Form = () => activeStep === 0 ? <AddressForm checkoutToken={checkoutToken}/> : <PaymentForm />
 
     return (
         <Fragment>
